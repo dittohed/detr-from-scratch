@@ -14,7 +14,7 @@ class CocoDetection(torchvision.datasets.CocoDetection):
 
     def __init__(self, img_folder, ann_file, transforms):
         super(CocoDetection, self).__init__(img_folder, ann_file)
-        self.transforms = transforms
+        self._transforms = transforms  # Adding _, otherwise overwriting super
         self.convert_func = ConvertCocoAnnotations()
 
     def __getitem__(self, idx):  # TODO: refactor
@@ -22,8 +22,8 @@ class CocoDetection(torchvision.datasets.CocoDetection):
         image_id = self.ids[idx]
         target = {'image_id': image_id, 'annotations': target}  # TODO: really needed?
         img, target = self.convert_func(img, target)
-        if self.transforms is not None:
-            img, target = self.transforms(img, target)
+        if self._transforms is not None:
+            img, target = self._transforms(img, target)
         return img, target
 
 
@@ -128,5 +128,5 @@ def build_dataset(coco_dir: str, subset: str):
     transforms = get_transforms(subset)
     
     dataset = CocoDetection(str(root), str(ann_file), transforms=transforms)
-    
+
     return dataset
